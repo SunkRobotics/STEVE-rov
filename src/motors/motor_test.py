@@ -8,7 +8,7 @@ import time
 i2c = busio.I2C(board.SCL, board.SDA)
 pca = adafruit_pca9685.PCA9685(i2c)
 
-kit = ServoKit(channels=16)
+kit = ServoKit(channels=16, reference_clock_speed=26541466)
 
 for servo_num in range(6):
     kit.servo[servo_num].set_pulse_width_range(1100, 1900)
@@ -16,5 +16,5 @@ for servo_num in range(6):
 
 
 kit.servo[0].set_pulse_width_range(1100, 1900)
-kit.servo[0].angle = 115
-kit.servo[1].angle = 115
+kit.servo[0].angle = 90
+kit.servo[1].angle = 90

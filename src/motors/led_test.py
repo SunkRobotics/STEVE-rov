@@ -7,7 +7,7 @@ import time
 i2c = busio.I2C(board.SCL, board.SDA)
 pca = adafruit_pca9685.PCA9685(i2c)
 
-pca.frequency = 255
+pca.frequency = 100
 led_channel = pca.channels[8]
 
 led_channel.duty_cycle = 1000
