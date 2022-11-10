@@ -21,7 +21,7 @@ if not sensor.read():
 # Spew readings
 while True:
         if sensor.read():
-                print("P: %0.1f mbar  %0.3f psi\tT: %0.2f C  %0.2f F") % (
+                print(f'P: %0.1f mbar  %0.3f psi\tT: %0.2f C  {} F')
                 sensor.pressure(), # Default is mbar (no arguments)
                 sensor.pressure(ms5837.UNITS_psi), # Request psi
                 sensor.temperature(), # Default is degrees C (no arguments)
