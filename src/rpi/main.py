@@ -1,8 +1,7 @@
 import asyncio
-import io
 import json
-import serial
 import time
+from motors import Motors
 import websockets
 
 
@@ -114,66 +113,65 @@ class PID:
 
 
 async def main_server():
+    motors = Motors()
     # adjust the y-velocity to have the ROV remain at a constant depth
     #  vertical_anchor = False
     #  vertical_pid = PID(0, 0.4, 3, 0.001)
     # stores the last button press of the velocity toggle button
-    prev_velocity_toggle = None
+    prev_speed_toggle = None
     # multiplier for velocity to set speed limit
-    velocity_limit = 0.5
+    speed_factor = 0.5
 
-    prev_anchor_toggle = None
+    #  prev_anchor_toggle = None
 
     print("Server started!")
     while True:
         joystick_data = WSServer.pump_joystick_data()
 
-        if WSServer.web_client_main:
-            try:
-                await WSServer.web_client_main.send(json.dumps(arduino_data))
-            except websockets.exceptions.ConnectionClosedOK:
-                pass
         # if a joystick client hasn't connected yet
         if not joystick_data:
             await asyncio.sleep(0.01)
             continue
 
-        x_velocity = joystick_data['axes'][0] * velocity_limit
+        x_velocity = joystick_data['axes'][0] * speed_factor
         # the joystick interprets up as -1 and down as 1, the negative just
         # reverses this so up is 1 and down is -1
-        y_velocity = -joystick_data['axes'][1] * velocity_limit
-        z_velocity = -joystick_data['axes'][3] * velocity_limit
-        yaw_velocity = joystick_data['axes'][2] * velocity_limit
-        roll_velocity = joystick_data['dpad'][0] * velocity_limit
-        gripper_grab = (joystick_data['buttons'][7]
-                        - joystick_data['buttons'][6])
+        y_velocity = -joystick_data['axes'][1] * speed_factor
+        z_velocity = -joystick_data['axes'][3] * speed_factor
+        yaw_velocity = joystick_data['axes'][2] * speed_factor
+        roll_velocity = joystick_data['dpad'][0] * speed_factor
+        #  gripper_grab = (joystick_data['buttons'][7]
+        #                  - joystick_data['buttons'][6])
         # rotate left if negative, rotate right if positive
         #  gripper_rotate = (joystick_data['buttons'][5]
         #                    - joystick_data['buttons'][4])
-        velocity_toggle = joystick_data['dpad'][1]
-        anchor_toggle = joystick_data['buttons'][11]
+        speed_toggle = joystick_data['dpad'][1]
+        #  anchor_toggle = joystick_data['buttons'][11]
 
         # if vertical_anchor:
         # arduino_commands["y"] = vertical_pid.compute(
         # arduino_data["z_accel"])
 
+        motors.drive_motors(x_velocity, y_velocity, z_velocity, yaw_velocity,
+                            roll_velocity)
+
         # increase or decrease speed when the dpad buttons are pressed
-        if velocity_toggle != prev_velocity_toggle:
-            # make sure velocity doesn't exceed 128
-            if velocity_toggle > 0 and velocity_limit <= 1:
-                velocity_limit *= 2
-            # make sure velocity doesn't fall below 16
-            if velocity_toggle < 0 and velocity_multiplier >= 0.125:
-                velocity_limit /= 2
-            prev_velocity_toggle = velocity_toggle
+        if speed_toggle != prev_speed_toggle:
+            # make sure the speed doesn't exceed 1
+            if speed_toggle > 0 and speed_factor <= 1:
+                speed_factor *= 2
+            # make sure the speed doesn't fall below 0.125
+            if speed_toggle < 0 and speed_factor >= 0.125:
+                speed_factor /= 2
+            prev_speed_toggle = speed_toggle
 
         # toggle the vertical anchor
-        if anchor_toggle == 1 and prev_anchor_toggle == 0:
-            if vertical_anchor:
-                vertical_anchor = False
-            else:
-                vertical_anchor = True
-        prev_anchor_toggle = anchor_toggle
+        #  if anchor_toggle == 1 and prev_anchor_toggle == 0:
+        #      if vertical_anchor:
+        #          vertical_anchor = False
+        #      else:
+        #          vertical_anchor = True
+        #  prev_anchor_toggle = anchor_toggle
 
         await asyncio.sleep(0.01)
 
@@ -184,7 +182,6 @@ def main():
         WSServer.handler, "0.0.0.0", 8765, ping_interval=None)
     asyncio.ensure_future(ws_server)
     asyncio.ensure_future(main_server())
-    asyncio.ensure_future(ArduinoSerial.listener())
     loop.run_forever()
 
 
