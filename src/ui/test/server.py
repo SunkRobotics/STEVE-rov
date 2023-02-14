@@ -16,7 +16,7 @@ async def send(websocket):
         await websocket.send(str_data)
 
 async def main():
-    async with serve(send, "localhost", 3000):
+    async with serve(send, "192.168.0.101", 3000):
         await asyncio.Future()
 
 
