@@ -15,7 +15,7 @@ class WSServer:
         picam2 = Picamera2()
         #  picam2.set_controls({"AfMode": 2})
         picam2.configure(picam2.create_video_configuration(
-            main={"size": (854, 480)}))
+            main={"size": (1280, 720)}))
         picam2.start()
         #  picam2.start_recording(JpegEncoder(), FileOutput(cls.buffer))
 
@@ -25,7 +25,7 @@ class WSServer:
             str_data = base64.b64encode(buffer.getbuffer())
             await websocket.send(str_data)
             #  print(buffer.getbuffer().nbytes)
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.001)
 
     @classmethod
     async def picamera_server(cls):

@@ -7,6 +7,14 @@ import base64
 from websockets import serve
 
 
+class StreamingOutput(io.BufferedIOBase):
+    def __init__(self):
+        self.frame = None
+
+    def write(self, buf):
+        self.frame = buf
+
+
 class WSServer:
     #  buffer = io.BytesIO()
 
@@ -15,17 +23,21 @@ class WSServer:
         picam2 = Picamera2()
         #  picam2.set_controls({"AfMode": 2})
         picam2.configure(picam2.create_video_configuration(
-            main={"size": (854, 480)}))
-        picam2.start()
-        #  picam2.start_recording(JpegEncoder(), FileOutput(cls.buffer))
+            main={"size": (1280, 720)}))
+        #  picam2.start()
+        output = StreamingOutput()
+        picam2.start_recording(JpegEncoder(), FileOutput(output))
 
         while True:
-            buffer = io.BytesIO()
-            picam2.capture_file(buffer, format='jpeg')
-            str_data = base64.b64encode(buffer.getbuffer())
+            #  buffer = io.BytesIO()
+            #  picam2.capture_file(buffer, format='jpeg')
+            if output.frame is None:
+                continue
+            str_data = base64.b64encode(output.frame)
+
             await websocket.send(str_data)
             #  print(buffer.getbuffer().nbytes)
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.001)
 
     @classmethod
     async def picamera_server(cls):
