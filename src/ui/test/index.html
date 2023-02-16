@@ -8,13 +8,13 @@
 </head>
 <body>
     <h1>Sunk Cam</h1>
-    <img src="" class="target">
+    <img src="" class="target" width=1280 height=720>
 
     <script>
         const img = document.querySelector('.target')
         console.log(img);
 
-        let ws = new WebSocket("ws://localhost:3000")
+        let ws = new WebSocket("ws://192.168.0.102:3000")
 
         ws.addEventListener('message', (event) => {
             event.data.text().then(res => img.src = "data:image/jpg;base64," + res)
