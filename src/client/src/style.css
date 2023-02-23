@@ -1,6 +1,15 @@
+@font-face { 
+  font-family: "FiraSans";  
+  src: url("fonts/FiraSans-Regular.otf") format("opentype"); 
+  font-style: normal;
+}
+@font-face {
+  font-family: "FiraSansMedium";
+  src: url("fonts/FiraSans-Medium.otf") format("opentype");
+}
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
+  font-family: FiraSans, Helvetica, Arial, sans-serif;
+  font-size: 1.2em;
   line-height: 24px;
   font-weight: 400;
 
@@ -84,19 +93,42 @@ button {
   margin-right: 5px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
+body {
+  font-family: "FiraSans", sans-serif;
+  font-size: 1.2em;
+}
+h1 {
+  font-family: "FiraSansMedium", sans-serif
+}
 
-  a:hover {
-    color: #24c8db;
-  }
+.camera {
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  width: 48vw;
+  height: 27vw;
+}
 
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
+#live-image1 {
+  width: 48vw;
+  height: 27vw;
+}
+
+#live-image2 {
+  width: 48vw;
+  height: 27vw;
+}
+
+#camera-feeds {
+  display: flex;
+  justify-content: space-around;
+  align-items: space-around;
+}
+
+.live-image-div {
+  display: block;
+  text-align: center;
+}
+
+.text {
+  margin-bottom: 1em;
 }
