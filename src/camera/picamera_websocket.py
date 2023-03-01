@@ -36,7 +36,7 @@ class WSServer:
 
 def main():
     picam2 = Picamera2()
-    picam2.set_controls({"AfMode": 2})
+    #  picam2.set_controls({"AfMode": 2})
     picam2.configure(picam2.create_video_configuration(
         main={"size": (1280, 720)}))
     picam2.start_recording(JpegEncoder(), FileOutput(WSServer.output))
@@ -45,6 +45,9 @@ def main():
     ws_server = serve(
         WSServer.handler, "0.0.0.0", 3000, ping_interval=None
     )
-    #  asyncio.ensure_future(WSServer.picamera_server())
     asyncio.ensure_future(ws_server)
     loop.run_forever()
+
+
+if __name__ == "__main__":
+    main()
