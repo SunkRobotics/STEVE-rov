@@ -1,11 +1,11 @@
 @font-face { 
   font-family: "FiraSans";  
-  src: url("fonts/FiraSans-Regular.otf") format("opentype"); 
+  src: url("/src/assets/fonts/FiraSans-Regular.otf") format("opentype"); 
   font-style: normal;
 }
 @font-face {
   font-family: "FiraSansMedium";
-  src: url("fonts/FiraSans-Medium.otf") format("opentype");
+  src: url("/src/assets/fonts/FiraSans-Medium.otf") format("opentype");
 }
 :root {
   font-family: FiraSans, Helvetica, Arial, sans-serif;
@@ -104,8 +104,8 @@ h1 {
 .camera {
   margin-left: 0.5em;
   margin-right: 0.5em;
+  aspect-ratio: 16/9;
   width: 48vw;
-  height: 27vw;
 }
 
 #live-image1 {
@@ -113,10 +113,10 @@ h1 {
   height: 27vw;
 }
 
-#live-image2 {
-  width: 48vw;
-  height: 27vw;
-}
+/* #live-image2 { */
+/*   width: 48vw; */
+/*   height: 27vw; */
+/* } */
 
 #camera-feeds {
   display: flex;
