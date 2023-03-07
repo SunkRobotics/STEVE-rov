@@ -1,6 +1,6 @@
 const feed1 = document.querySelector('#feed1') as HTMLCanvasElement;
 // const feed2 = document.querySelector('#feed2') as HTMLImageElement;
-let ws_feed1 = new WebSocket("ws://192.168.0.102:3000");
+let ws_feed1 = new WebSocket("ws://192.168.0.100:3000");
 
 ws_feed1.addEventListener('message', (event: MessageEvent) => {
   event.data.text().then((res: string) => {
@@ -30,8 +30,28 @@ ws_feed1.addEventListener('error', (_) => {
 let gamepad: Gamepad | null;
 window.addEventListener("gamepadconnected", (event) => {
   gamepad = event.gamepad;
+  console.log("Gamepad connected!!!")
+  console.log(gamepad);
 });
 
 window.addEventListener("gamepaddisconnected", (_) => {
   gamepad = null;
+  console.log(gamepad);
 });
+
+function gamepadLoop() {
+  let gamepads = navigator.getGamepads();
+  console.log(gamepads);
+  if (!gamepads) {
+    return;
+  }
+  gamepad = gamepads[0];
+  if (!gamepad) {
+    return
+  }
+
+  let buttonValues = gamepad.buttons;
+  console.log(buttonValues);
+}
+
+setInterval(gamepadLoop, 500);

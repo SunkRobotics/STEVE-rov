@@ -19,6 +19,15 @@
         ws.addEventListener('message', (event) => {
             event.data.text().then(res => img.src = "data:image/jpg;base64," + res)
         })
-    </script>
+
+        window.addEventListener("gamepadconnected", (e) => {
+        console.log(
+          "Gamepad connected at index %d: %s. %d buttons, %d axes.",
+          e.gamepad.index,
+          e.gamepad.id,
+          e.gamepad.buttons.length,
+          e.gamepad.axes.length
+        );
+});    </script>
 </body>
 </html>

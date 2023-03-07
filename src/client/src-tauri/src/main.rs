@@ -11,6 +11,11 @@ fn greet(name: &str) -> String {
 
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            let app_handle = app.app_handle();
+            tauri::async_runtime::spawn(async move { app::run(app_handle) });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
