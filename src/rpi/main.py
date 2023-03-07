@@ -2,6 +2,7 @@ import asyncio
 import json
 import time
 from motors import Motors
+from ms5837 import MS5837_30BA
 import websockets
 
 
@@ -114,6 +115,7 @@ class PID:
 
 async def main_server():
     motors = Motors()
+    #  depth_sensor = 
     # adjust the y-velocity to have the ROV remain at a constant depth
     #  vertical_anchor = False
     #  vertical_pid = PID(0, 0.4, 3, 0.001)
