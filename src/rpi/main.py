@@ -2,7 +2,7 @@ import asyncio
 import json
 import time
 from motors import Motors
-from ms5837 import MS5837_30BA
+#  from ms5837 import MS5837_30BA
 import websockets
 
 
