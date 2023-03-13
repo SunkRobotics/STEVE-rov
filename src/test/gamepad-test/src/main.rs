@@ -2,14 +2,14 @@
 extern crate serde_json;
 use anyhow::Result;
 use early_returns::some_or_return;
-use gilrs::{Axis, Button, Gamepad, GamepadId, GilrsBuilder, Gilrs};
+use gilrs::{Axis, Button, Gamepad, GamepadId, Gilrs, GilrsBuilder};
 use serde::Serialize;
 use std::collections::HashMap;
-use std::time::Duration;
 use std::thread;
-use tungstenite::{Message};
+use std::time::Duration;
+use tungstenite::Message;
+use tungstenite::error::Error as TungsteniteError;
 use url::Url;
-// use gilrs::ev::filter::{Jitter, deadzone};
 
 #[derive(Debug, Serialize)]
 struct JoystickValues {
@@ -20,14 +20,19 @@ struct JoystickValues {
 }
 
 impl JoystickValues {
-    pub fn new(buttons: HashMap<String, bool>, left_stick: (f32, f32), right_stick: (f32, f32), dpad: (i8, i8)) -> JoystickValues {
+    pub fn new(
+        buttons: HashMap<String, bool>,
+        left_stick: (f32, f32),
+        right_stick: (f32, f32),
+        dpad: (i8, i8),
+    ) -> JoystickValues {
         JoystickValues {
             buttons,
             left_stick,
             right_stick,
-            dpad
+            dpad,
         }
-    } 
+    }
 }
 
 fn get_filtered_axis(gamepad: Gamepad, axis: Axis) -> f32 {
@@ -47,20 +52,22 @@ fn main() -> Result<()> {
     let mut websocket = None;
     let gamepad_id: GamepadId;
 
-    loop {
-        if let Ok((mut socket, _)) = tungstenite::connect(Url::parse("ws://localhost:8765")?) {
-            websocket = Some(socket);
-            break;
-        } else {
-            thread::sleep(Duration::from_millis(1));
-            continue;
-        };
-
-    }
+    // loop {
+    //     if let Ok((socket, _)) = tungstenite::connect(Url::parse("ws://localhost:8765")?) {
+    //         websocket = socket;
+    //         break;
+    //     } else {
+    //         thread::sleep(Duration::from_millis(1));
+    //         continue;
+    //     };
+    // }
     // wait for the gamepad to connect
     println!("Waiting for gamepad to connect!");
     loop {
-        gilrs = GilrsBuilder::new().with_default_filters(false).build().unwrap();
+        gilrs = GilrsBuilder::new()
+            .with_default_filters(false)
+            .build()
+            .unwrap();
         if let Some((_id, gp)) = gilrs.gamepads().next() {
             gamepad_id = gp.id();
             break;
@@ -69,6 +76,17 @@ fn main() -> Result<()> {
     println!("{} found!", gilrs.gamepad(gamepad_id).name());
     println!("Gamepad found!");
     loop {
+        if let None = websocket {
+            loop {
+                if let Ok((socket, _)) = tungstenite::connect(Url::parse("ws://localhost:8765")?) {
+                    websocket = Some(socket);
+                    break;
+                } else {
+                    thread::sleep(Duration::from_millis(1));
+                    continue;
+                };
+            }
+        }
         gilrs.next_event();
         let gamepad = gilrs.gamepad(gamepad_id);
 
@@ -78,18 +96,41 @@ fn main() -> Result<()> {
         buttons.insert("East".to_string(), gamepad.is_pressed(Button::East));
         buttons.insert("South".to_string(), gamepad.is_pressed(Button::South));
         buttons.insert("West".to_string(), gamepad.is_pressed(Button::West));
-        buttons.insert("Left Bumper".to_string(), gamepad.is_pressed(Button::LeftTrigger));
-        buttons.insert("Right Bumper".to_string(), gamepad.is_pressed(Button::RightTrigger));
-        buttons.insert("Left Trigger".to_string(), gamepad.is_pressed(Button::LeftTrigger2));
-        buttons.insert("Right Trigger".to_string(), gamepad.is_pressed(Button::RightTrigger2));
-        buttons.insert("Left Thumb".to_string(), gamepad.is_pressed(Button::LeftThumb));
-        buttons.insert("Right Thumb".to_string(), gamepad.is_pressed(Button::RightThumb));
+        buttons.insert(
+            "Left Bumper".to_string(),
+            gamepad.is_pressed(Button::LeftTrigger),
+        );
+        buttons.insert(
+            "Right Bumper".to_string(),
+            gamepad.is_pressed(Button::RightTrigger),
+        );
+        buttons.insert(
+            "Left Trigger".to_string(),
+            gamepad.is_pressed(Button::LeftTrigger2),
+        );
+        buttons.insert(
+            "Right Trigger".to_string(),
+            gamepad.is_pressed(Button::RightTrigger2),
+        );
+        buttons.insert(
+            "Left Thumb".to_string(),
+            gamepad.is_pressed(Button::LeftThumb),
+        );
+        buttons.insert(
+            "Right Thumb".to_string(),
+            gamepad.is_pressed(Button::RightThumb),
+        );
         buttons.insert("Start".to_string(), gamepad.is_pressed(Button::Start));
         buttons.insert("Select".to_string(), gamepad.is_pressed(Button::Select));
 
-
-        let left_stick = (get_filtered_axis(gamepad, Axis::LeftStickX), get_filtered_axis(gamepad, Axis::LeftStickY));
-        let right_stick = (get_filtered_axis(gamepad, Axis::RightStickX), get_filtered_axis(gamepad, Axis::RightStickY));
+        let left_stick = (
+            get_filtered_axis(gamepad, Axis::LeftStickX),
+            get_filtered_axis(gamepad, Axis::LeftStickY),
+        );
+        let right_stick = (
+            get_filtered_axis(gamepad, Axis::RightStickX),
+            get_filtered_axis(gamepad, Axis::RightStickY),
+        );
 
         let dpad_x = if gamepad.is_pressed(Button::DPadLeft) {
             -1
@@ -110,10 +151,16 @@ fn main() -> Result<()> {
 
         let joystick_values = JoystickValues::new(buttons, left_stick, right_stick, dpad);
 
-        
-        println!("Connected to ROV!");
-        // websocket.as_ref().unwrap().write_message(Message::Text(serde_json::to_string(&joystick_values)?))?;
-
+        if let Some(ws) = websocket.as_mut() {
+            match ws.write_message(Message::Text(serde_json::to_string(&joystick_values)?)) {
+                Ok(()) => (),
+                Err(error) => {
+                    websocket = None;
+                    eprintln!("Websocket Error!");
+                    eprintln!("{error}");
+                },
+            }
+        }
         thread::sleep(Duration::from_millis(1));
     }
 }
