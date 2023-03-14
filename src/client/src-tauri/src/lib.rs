@@ -1,7 +1,7 @@
 extern crate anyhow;
-use anyhow::{anyhow, Context, Result};
-use tauri::{AppHandle, Manager, State};
+use anyhow::Result;
+// use tauri::{AppHandle, Manager, State};
 
-pub fn run(app: tauri::AppHandle) -> Result<()> {
+pub fn run() -> Result<()> {
     Ok(())
 }
