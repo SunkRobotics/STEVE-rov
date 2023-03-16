@@ -1,6 +1,6 @@
 const feed1 = document.querySelector('#feed1') as HTMLCanvasElement;
 // const feed2 = document.querySelector('#feed2') as HTMLImageElement;
-let ws_feed1 = new WebSocket("ws://192.168.0.100:3000");
+let ws_feed1 = new WebSocket("ws://192.168.0.103:3000");
 
 ws_feed1.addEventListener('message', (event: MessageEvent) => {
   event.data.text().then((res: string) => {
