@@ -4,7 +4,7 @@ mod gamepad;
 use anyhow::Result;
 use early_returns::ok_or_continue;
 use gamepad::GamepadData;
-use gilrs::{GamepadId, Gilrs, GilrsBuilder};
+use gilrs::{GamepadId, Gilrs};
 use std::thread;
 use std::time::Duration;
 use tungstenite::Message;
@@ -18,10 +18,7 @@ pub fn run() -> Result<()> {
     // wait for the gamepad to connect
     println!("Waiting for gamepad to connect!");
     loop {
-        gilrs = GilrsBuilder::new()
-            .with_default_filters(false)
-            .build()
-            .unwrap();
+        gilrs = Gilrs::new().unwrap();
         if let Some((_id, gp)) = gilrs.gamepads().next() {
             gamepad_id = gp.id();
             break;
@@ -37,7 +34,7 @@ pub fn run() -> Result<()> {
                     tungstenite::connect(Url::parse("ws://localhost:8765")?)
                 {
                     println!("Connected!");
-                    let client_info = String::from(r#"{"client_info": "joystick"}"#);
+                    let client_info = String::from(r#"{"client_type": "joystick"}"#);
                     ok_or_continue!(socket.write_message(Message::Text(client_info)));
 
                     websocket = Some(socket);

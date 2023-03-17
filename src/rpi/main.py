@@ -29,7 +29,6 @@ class WSServer:
         print("Joystick client connected")
         async for message in websocket:
             cls.joystick_data = json.loads(message)
-            # print(cls.joystick_data)
         cls.joystick_client = None
 
     @classmethod
@@ -68,7 +67,11 @@ class WSServer:
             print("Connection failed!")
             return
         client_info = json.loads(client_info_json)
-        client_type = client_info["client_type"]
+        try:
+            client_type = client_info["client_type"]
+        except KeyError:
+            print("Key error!")
+            return
         if client_type == "joystick":
             await cls.joystick_handler(websocket, path)
         elif client_type == "web_client_main":
@@ -115,7 +118,7 @@ class PID:
 
 async def main_server():
     motors = Motors()
-    #  depth_sensor = 
+    #  depth_sensor =
     # adjust the y-velocity to have the ROV remain at a constant depth
     #  vertical_anchor = False
     #  vertical_pid = PID(0, 0.4, 3, 0.001)
@@ -135,19 +138,19 @@ async def main_server():
             await asyncio.sleep(0.01)
             continue
 
-        x_velocity = joystick_data['axes'][0] * speed_factor
+        x_velocity = joystick_data["left_stick"][0] * speed_factor
         # the joystick interprets up as -1 and down as 1, the negative just
         # reverses this so up is 1 and down is -1
-        y_velocity = -joystick_data['axes'][1] * speed_factor
-        z_velocity = -joystick_data['axes'][3] * speed_factor
-        yaw_velocity = joystick_data['axes'][2] * speed_factor
-        roll_velocity = joystick_data['dpad'][0] * speed_factor
-        #  gripper_grab = (joystick_data['buttons'][7]
-        #                  - joystick_data['buttons'][6])
+        y_velocity = joystick_data["left_stick"][1] * speed_factor
+        z_velocity = joystick_data["right_stick"][1] * speed_factor
+        yaw_velocity = joystick_data["right_stick"][0] * speed_factor
+        roll_velocity = joystick_data["dpad"][0] * speed_factor
+        #  gripper_grab = (joystick_data["buttons"]["right_trigger"]
+        #                  - joystick_data["buttons"]["left_trigger"])
         # rotate left if negative, rotate right if positive
-        #  gripper_rotate = (joystick_data['buttons'][5]
-        #                    - joystick_data['buttons'][4])
-        speed_toggle = joystick_data['dpad'][1]
+        #  gripper_rotate = (joystick_data["buttons"]["right_bumper"]
+        #                    - joystick_data["buttons"]["left_bumper"])
+        speed_toggle = joystick_data["dpad"][1]
         #  anchor_toggle = joystick_data['buttons'][11]
 
         # if vertical_anchor:
@@ -160,11 +163,17 @@ async def main_server():
         # increase or decrease speed when the dpad buttons are pressed
         if speed_toggle != prev_speed_toggle:
             # make sure the speed doesn't exceed 1
-            if speed_toggle > 0 and speed_factor <= 1:
+            if speed_toggle > 0 and speed_factor < 1:
                 speed_factor *= 2
             # make sure the speed doesn't fall below 0.125
             if speed_toggle < 0 and speed_factor >= 0.125:
                 speed_factor /= 2
+
+            # just in case the speed factor ends up out of range
+            if speed_factor > 1:
+                speed_factor = 1
+            elif speed_factor < 0:
+                speed_factor = 0
             prev_speed_toggle = speed_toggle
 
         # toggle the vertical anchor

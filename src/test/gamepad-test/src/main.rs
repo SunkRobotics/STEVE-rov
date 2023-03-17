@@ -2,7 +2,7 @@
 extern crate serde_json;
 use anyhow::Result;
 use early_returns::{ok_or_continue, some_or_return};
-use gilrs::{Axis, Button, Gamepad, GamepadId, Gilrs, GilrsBuilder};
+use gilrs::{Axis, Button, Event, Gamepad, GamepadId, Gilrs, GilrsBuilder};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::thread;
@@ -122,10 +122,7 @@ fn main() -> Result<()> {
     // wait for the gamepad to connect
     println!("Waiting for gamepad to connect!");
     loop {
-        gilrs = GilrsBuilder::new()
-            .with_default_filters(false)
-            .build()
-            .unwrap();
+        gilrs = Gilrs::new().unwrap();
         if let Some((_id, gp)) = gilrs.gamepads().next() {
             gamepad_id = gp.id();
             break;

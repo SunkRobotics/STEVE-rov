@@ -31,36 +31,36 @@ impl GamepadData {
     pub fn get_buttons(gamepad: Gamepad) -> HashMap<String, bool> {
         let mut buttons: HashMap<String, bool> = HashMap::new();
 
-        buttons.insert("North".to_string(), gamepad.is_pressed(Button::North));
-        buttons.insert("East".to_string(), gamepad.is_pressed(Button::East));
-        buttons.insert("South".to_string(), gamepad.is_pressed(Button::South));
-        buttons.insert("West".to_string(), gamepad.is_pressed(Button::West));
+        buttons.insert("north".to_string(), gamepad.is_pressed(Button::North));
+        buttons.insert("east".to_string(), gamepad.is_pressed(Button::East));
+        buttons.insert("south".to_string(), gamepad.is_pressed(Button::South));
+        buttons.insert("west".to_string(), gamepad.is_pressed(Button::West));
         buttons.insert(
-            "Left Bumper".to_string(),
+            "left_bumper".to_string(),
             gamepad.is_pressed(Button::LeftTrigger),
         );
         buttons.insert(
-            "Right Bumper".to_string(),
+            "right_bumper".to_string(),
             gamepad.is_pressed(Button::RightTrigger),
         );
         buttons.insert(
-            "Left Trigger".to_string(),
+            "left_trigger".to_string(),
             gamepad.is_pressed(Button::LeftTrigger2),
         );
         buttons.insert(
-            "Right Trigger".to_string(),
+            "right_trigger".to_string(),
             gamepad.is_pressed(Button::RightTrigger2),
         );
         buttons.insert(
-            "Left Thumb".to_string(),
+            "left_thumb".to_string(),
             gamepad.is_pressed(Button::LeftThumb),
         );
         buttons.insert(
-            "Right Thumb".to_string(),
+            "right_thumb".to_string(),
             gamepad.is_pressed(Button::RightThumb),
         );
-        buttons.insert("Start".to_string(), gamepad.is_pressed(Button::Start));
-        buttons.insert("Select".to_string(), gamepad.is_pressed(Button::Select));
+        buttons.insert("start".to_string(), gamepad.is_pressed(Button::Start));
+        buttons.insert("select".to_string(), gamepad.is_pressed(Button::Select));
         buttons
     }
 
