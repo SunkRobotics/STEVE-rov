@@ -24,11 +24,12 @@ class WSServer:
         try:
             while True:
                 if cls.output.frame is None:
+                    await asyncio.sleep(0.001)
                     continue
                 str_data = base64.b64encode(cls.output.frame)
 
                 await websocket.send(str_data)
-                await asyncio.sleep(0.0001)
+                await asyncio.sleep(0.001)
 
         except ConnectionClosed:
             print("Client disconnected!")

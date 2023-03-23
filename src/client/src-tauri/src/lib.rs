@@ -30,8 +30,8 @@ pub fn run() -> Result<()> {
         if let None = websocket {
             loop {
                 if let Ok((mut socket, _)) =
-                    // tungstenite::connect(Url::parse("ws://192.168.100.1:8765")?)
-                    tungstenite::connect(Url::parse("ws://localhost:8765")?)
+                    tungstenite::connect(Url::parse("ws://192.168.100.1:8765")?)
+                    // tungstenite::connect(Url::parse("ws://localhost:8765")?)
                 {
                     println!("Connected!");
                     let client_info = String::from(r#"{"client_type": "joystick"}"#);
