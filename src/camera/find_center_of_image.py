@@ -16,11 +16,13 @@ lower_red = np.array([170, 50, 50])
 upper_red = np.array([180, 255, 255])
 mask2 = cv2.inRange(hsv, lower_red, upper_red)
 
+
 # Combine the masks
 mask = cv2.bitwise_or(mask1, mask2)
 
 # Find contours
-contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+contours, hierarchy = cv2.findContours(
+    mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 # Find the largest contour and its centroid
 if len(contours) > 0:
@@ -33,6 +35,5 @@ if len(contours) > 0:
         cv2.circle(img, (cx, cy), 7, (255, 255, 255), -1)
         cv2.imshow('Centroid', img)
         cv2.waitKey(0)
-        
-cv2.destroyAllWindows()
 
+cv2.destroyAllWindows()

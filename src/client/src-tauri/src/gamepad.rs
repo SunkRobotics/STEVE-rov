@@ -98,8 +98,9 @@ impl GamepadData {
 }
 
 fn get_filtered_axis(gamepad: Gamepad, axis: Axis) -> f32 {
-    let axis_code = some_or_return!(gamepad.axis_code(axis), 0.0);
-    let deadzone = some_or_return!(gamepad.deadzone(axis_code), 0.0);
+    // let axis_code = some_or_return!(gamepad.axis_code(axis), 0.0);
+    // let deadzone = some_or_return!(gamepad.deadzone(axis_code), 0.0);
+    let deadzone = 0.1;
     let axis_value = gamepad.value(axis);
 
     if axis_value.abs() < deadzone {
