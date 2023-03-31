@@ -8,26 +8,27 @@
 </head>
 <body>
     <h1>Sunk Cam</h1>
-    <img src="" class="target" width=1280 height=720>
+    <img src="" id="feed1" width=1280 height=720>
+    <img src="" id="feed2" width=1280 height=720>
 
     <script>
-        const img = document.querySelector('.target')
-        console.log(img);
+        const img1 = document.querySelector('#feed1')
+        // const img2 = document.querySelector('#feed2')
 
-        let ws = new WebSocket("ws://192.168.100.7:3000")
+        let ws = new WebSocket("ws://192.168.100.2:3000")
 
         ws.addEventListener('message', (event) => {
-            event.data.text().then(res => img.src = "data:image/jpg;base64," + res)
+            event.data.text().then(res => img1.src = "data:image/jpg;base64," + res)
         })
 
-        window.addEventListener("gamepadconnected", (e) => {
-        console.log(
-          "Gamepad connected at index %d: %s. %d buttons, %d axes.",
-          e.gamepad.index,
-          e.gamepad.id,
-          e.gamepad.buttons.length,
-          e.gamepad.axes.length
-        );
-});    </script>
+        // let ws1 = new WebSocket("ws://192.168.100.7:3000")
+
+        /*
+        ws1.addEventListener('message', (event) => {
+            event.data.text().then(res => img2.src = "data:image/jpg;base64," + res)
+        })
+        */
+
+    </script>
 </body>
 </html>

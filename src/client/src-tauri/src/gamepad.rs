@@ -1,6 +1,5 @@
 #[allow(dead_code)]
 extern crate serde_json;
-use early_returns::some_or_return;
 use gilrs::{Axis, Button, Gamepad};
 use serde::Serialize;
 use std::collections::HashMap;

@@ -2,7 +2,7 @@
 extern crate serde_json;
 use anyhow::Result;
 use early_returns::{ok_or_continue, some_or_return};
-use gilrs::{Axis, Button, Event, Gamepad, GamepadId, Gilrs, GilrsBuilder};
+use gilrs::{Axis, Button, Gamepad, GamepadId, Gilrs};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::thread;
@@ -116,7 +116,7 @@ fn get_filtered_axis(gamepad: Gamepad, axis: Axis) -> f32 {
 
 fn main() -> Result<()> {
     let mut gilrs: Gilrs;
-    // let mut websocket: Option = None;
+    let mut websocket = None;
     let gamepad_id: GamepadId;
 
     // wait for the gamepad to connect
@@ -131,40 +131,40 @@ fn main() -> Result<()> {
     println!("{} found!", gilrs.gamepad(gamepad_id).name());
     println!("Gamepad found!");
     loop {
-        // if let None = websocket {
-        //     loop {
-        //         if let Ok((mut socket, _)) =
-        //             // tungstenite::connect(Url::parse("ws://192.168.100.1:8765")?)
-        //              tungstenite::connect(Url::parse("ws://localhost:8765")?)
-        //         {
-        //             println!("Connected!");
-        //             let client_info = String::from(r#"{"client_info": "joystick"}"#);
-        //             ok_or_continue!(socket.write_message(Message::Text(client_info)));
+        if let None = websocket {
+            loop {
+                if let Ok((mut socket, _)) =
+                    tungstenite::connect(Url::parse("ws://192.168.100.1:8765")?)
+                     // tungstenite::connect(Url::parse("ws://localhost:8765")?)
+                {
+                    println!("Connected!");
+                    let client_info = String::from(r#"{"client_info": "joystick"}"#);
+                    ok_or_continue!(socket.write_message(Message::Text(client_info)));
 
-        //             websocket = Some(socket);
-        //             break;
-        //         } else {
-        //             thread::sleep(Duration::from_millis(1));
-        //             continue;
-        //         };
-        //     }
-        // }
+                    websocket = Some(socket);
+                    break;
+                } else {
+                    thread::sleep(Duration::from_millis(1));
+                    continue;
+                };
+            }
+        }
         gilrs.next_event();
         let gamepad = gilrs.gamepad(gamepad_id);
 
         let joystick_values = JoystickValues::new(gamepad);
 
         println!("{:#?}", joystick_values);
-        // if let Some(ws) = websocket.as_mut() {
-        //     match ws.write_message(Message::Text(serde_json::to_string(&joystick_values)?)) {
-        //         Ok(()) => (),
-        //         Err(error) => {
-        //             websocket = None;
-        //             eprintln!("Websocket Error!");
-        //             eprintln!("{error}");
-        //         }
-        //     }
-        // }
+        if let Some(ws) = websocket.as_mut() {
+            match ws.write_message(Message::Text(serde_json::to_string(&joystick_values)?)) {
+                Ok(()) => (),
+                Err(error) => {
+                    websocket = None;
+                    eprintln!("Websocket Error!");
+                    eprintln!("{error}");
+                }
+            }
+        }
         thread::sleep(Duration::from_millis(1));
     }
 }

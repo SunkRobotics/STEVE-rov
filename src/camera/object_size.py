@@ -25,8 +25,14 @@ gray = cv2.GaussianBlur(gray, (9, 9), 0)
 # perform edge detection, then perform a dilation + erosion to
 # close gaps in between object edges
 edged = cv2.Canny(gray, 50, 100)
+cv2.imshow("Edge Detection", edged)
+cv2.waitKey(0)
 edged = cv2.dilate(edged, None, iterations=1)
+cv2.imshow("Edge Detection", edged)
+cv2.waitKey(0)
 edged = cv2.erode(edged, None, iterations=1)
+cv2.imshow("Edge Detection", edged)
+cv2.waitKey(0)
 # find contours in the edge map
 cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
                         cv2.CHAIN_APPROX_SIMPLE)
@@ -35,6 +41,20 @@ cnts = imutils.grab_contours(cnts)
 # 'pixels per metric' calibration variable
 (cnts, _) = contours.sort_contours(cnts)
 pixelsPerMetric = None
+
+original_image = image.copy()
+for contour in cnts:
+    box = cv2.minAreaRect(contour)
+    box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
+    box = np.array(box, dtype="int")
+    # order the points in the contour such that they appear
+    # in top-left, top-right, bottom-right, and bottom-left
+    # order, then draw the outline of the rotated bounding
+    # box
+    box = perspective.order_points(box)
+    cv2.drawContours(original_image, [box.astype("int")], -1, (0, 255, 0), 2)
+
+cv2.imshow("Boxes", original_image)
 
 # loop over the contours individually
 for c in cnts:
@@ -90,10 +110,10 @@ for c in cnts:
         dimA = dA / pixelsPerMetric
         dimB = dB / pixelsPerMetric
         # draw the object sizes on the image
-        cv2.putText(orig, "{:.1f}cm".format(dimA),
+        cv2.putText(orig, "{:.1f}in".format(dimA),
                     (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
                     0.65, (255, 255, 255), 2)
-        cv2.putText(orig, "{:.1f}cm".format(dimB),
+        cv2.putText(orig, "{:.1f}in".format(dimB),
                     (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
                     0.65, (255, 255, 255), 2)
         # show the output image

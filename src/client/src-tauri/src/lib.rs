@@ -1,7 +1,7 @@
 extern crate anyhow;
 extern crate serde_json;
 mod gamepad;
-use anyhow::Result;
+use anyhow::{bail, Result};
 use early_returns::ok_or_continue;
 use gamepad::GamepadData;
 use gilrs::{GamepadId, Gilrs};
@@ -18,7 +18,11 @@ pub fn run() -> Result<()> {
     // wait for the gamepad to connect
     println!("Waiting for gamepad to connect!");
     loop {
-        gilrs = Gilrs::new().unwrap();
+        gilrs = if let Ok(g) = Gilrs::new() {
+            g
+        } else {
+            bail!("Unable to initialize Gilrs!");
+        };
         if let Some((_id, gp)) = gilrs.gamepads().next() {
             gamepad_id = gp.id();
             break;
@@ -31,7 +35,7 @@ pub fn run() -> Result<()> {
             loop {
                 if let Ok((mut socket, _)) =
                     tungstenite::connect(Url::parse("ws://192.168.100.1:8765")?)
-                    // tungstenite::connect(Url::parse("ws://localhost:8765")?)
+                // tungstenite::connect(Url::parse("ws://localhost:8765")?)
                 {
                     println!("Connected!");
                     let client_info = String::from(r#"{"client_type": "joystick"}"#);
