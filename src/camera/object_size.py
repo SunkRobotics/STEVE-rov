@@ -6,8 +6,18 @@ import argparse
 import imutils
 import cv2
 
+def is_inside(bound_left: tuple(2), bound_right: tuple(2), inner_left: tuple(2), inner_right: tuple(2)) -> bool:
+    is_bound_x: bool = bound_left[0] <= inner_left[0] <= inner_right[0] <= bound_right[0]
+    is_bound_y: bool = bound_left[1] <= inner_left[1] <= inner_right[1] <= bound_right[1]
 
-def midpoint(point1, point2):
+    if is_bound_x and is_bound_y:
+        return True
+    return False
+
+
+
+
+def midpoint(point1, point2) -> bool:
     return ((point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2)
 
 

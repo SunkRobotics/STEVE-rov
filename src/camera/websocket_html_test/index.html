@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>camera test</title>
+</head>
+<body>
+    <canvas width="474" height="474" id="camera"></canvas>
+    <!-- <img id="camera"> -->
+
+    <script>
+
+        let ws = new WebSocket("ws://localhost:4000")
+        ws.binaryType = "arraybuffer"
+        
+        let canvas = document.querySelector("canvas")
+        let ctx = canvas.getContext("2d")
+
+        ws.addEventListener("message", (event) => {
+            let decoder = new ImageDecoder({
+                type: "image/jpeg",
+                data: event.data
+            })
+
+            let frame = decoder.decode().then((res) => {
+
+                ctx.drawImage(res.image, 0, 0);
+            })
+            
+            console.log("drew frame");
+        })
+    </script>
+</body>
+</html>
