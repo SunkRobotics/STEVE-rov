@@ -1,5 +1,5 @@
 import asyncio
-import numpy as np
+#  import numpy as np
 from websockets import serve
 import cv2
 import base64
@@ -12,11 +12,12 @@ async def send(websocket):
         _, frame = cap.read()
         byte_img = cv2.imencode('.jpg', frame)[1]
         str_data = base64.b64encode(byte_img)
-        
+
         await websocket.send(str_data)
 
+
 async def main():
-    async with serve(send, "192.168.0.101", 3000):
+    async with serve(send, "0.0.0.0", 3000):
         await asyncio.Future()
 
 
