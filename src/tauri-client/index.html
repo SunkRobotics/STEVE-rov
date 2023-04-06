@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>STEVE ROV Client</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>STEVE ROV Client!</h1>
+
+      <div id="camera-feeds">
+            <div class="live-image-div">
+              <canvas class="camera" id="feed1" width=1280 height=720></canvas>
+              <p>Camera 1</p>
+            </div>
+
+            
+            <div class="live-image-div">
+              <canvas class="camera" id="feed2" width=1280 height=720></canvas>
+            <p>Camera 2</p>
+            </div>
+      </div>
+    </div>
+  </body>
+</html>
