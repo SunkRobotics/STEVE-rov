@@ -189,13 +189,16 @@
               (data, byte) => data + String.fromCharCode(byte), '')
         );
 
+        
         const feed1_ctx = feed1.getContext("2d");
         frame.addEventListener("load", function () {
-          feed1_ctx.drawImage(frame, 0, 0, frame.width, frame.height, 0, 0, 1280, 1024);
+          //feed1_ctx.drawImage(frame, 0, 0, frame.width, frame.height, 0, 0, 854, 480);
+          feed1_ctx.drawImage(frame, 0, 0, frame.width, frame.height, 0, 0, 1280, 720);
         });
+        
       })
 
-      let ws_feed2 = new WebSocket("ws://192.168.100.7:3000")
+      let ws_feed2 = new WebSocket("ws://192.168.100.4:3000")
       //let ws_feed2 = new WebSocket("ws://localhost:4000")
       ws_feed2.binaryType = "arraybuffer"
         
