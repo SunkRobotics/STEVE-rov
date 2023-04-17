@@ -27,8 +27,8 @@ class Motors:
         # negative velocity - ROV moves left
         self.motor_velocities[0] -= velocity
         self.motor_velocities[1] += velocity
-        self.motor_velocities[2] -= velocity
-        self.motor_velocities[3] += velocity
+        self.motor_velocities[2] += velocity
+        self.motor_velocities[3] -= velocity
 
     # move the ROV forward or backward
     def calc_y_velocity(self, velocity: float):
@@ -52,8 +52,8 @@ class Motors:
         # negative velocity - ROV turns left
         self.motor_velocities[0] -= velocity
         self.motor_velocities[1] += velocity
-        self.motor_velocities[2] += velocity
-        self.motor_velocities[3] -= velocity
+        self.motor_velocities[2] -= velocity
+        self.motor_velocities[3] += velocity
 
     # make the ROV do a barrel roll
     def calc_roll_velocity(self, velocity: float):

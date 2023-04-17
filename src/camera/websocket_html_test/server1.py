@@ -4,7 +4,7 @@ from websockets import serve
 
 
 async def send(websocket):
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
     while cap.isOpened():
         _, frame = cap.read()
@@ -22,7 +22,7 @@ async def echo(websocket):
 
 
 async def main():
-    async with serve(send, "0.0.0.0", 3000):
+    async with serve(send, "0.0.0.0", 4000):
         await asyncio.Future()  # run forever
 
 asyncio.run(main())

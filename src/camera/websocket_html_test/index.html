@@ -7,12 +7,12 @@
     <title>camera test</title>
 </head>
 <body>
-    <canvas width="474" height="474" id="camera"></canvas>
+    <canvas width="1280" height="720" id="camera"></canvas>
     <!-- <img id="camera"> -->
 
     <script>
 
-        let ws = new WebSocket("ws://localhost:4000")
+        let ws = new WebSocket("ws://192.168.100.2:3000")
         ws.binaryType = "arraybuffer"
         
         let canvas = document.querySelector("canvas")

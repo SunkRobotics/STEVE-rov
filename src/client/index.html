@@ -2,12 +2,146 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="/src/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>STEVE ROV Client</title>
-    <script type="module" src="/src/main.ts" defer></script>
-  </head>
+    <style>
+      /*
+      @font-face { 
+        font-family: "FiraSans";  
+        src: url("/src/assets/fonts/FiraSans-Regular.otf") format("opentype"); 
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "FiraSansMedium";
+        src: url("/src/assets/fonts/FiraSans-Medium.otf") format("opentype");
+      }
+      */
+      :root {
+        font-family: FiraSans, Helvetica, Arial, sans-serif;
+        font-size: 1.2em;
+        line-height: 24px;
+        font-weight: 400;
 
+        color: #0f0f0f;
+        background-color: #f6f6f6;
+
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      .container {
+        margin: 0;
+        padding-top: 10vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .logo {
+        height: 6em;
+        padding: 1.5em;
+        will-change: filter;
+        transition: 0.75s;
+      }
+
+      .logo.tauri:hover {
+        filter: drop-shadow(0 0 2em #24c8db);
+      }
+
+      .row {
+        display: flex;
+        justify-content: center;
+      }
+
+      a {
+        font-weight: 500;
+        color: #646cff;
+        text-decoration: inherit;
+      }
+
+      a:hover {
+        color: #535bf2;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      input,
+      button {
+        border-radius: 8px;
+        border: 1px solid transparent;
+        padding: 0.6em 1.2em;
+        font-size: 1em;
+        font-weight: 500;
+        font-family: inherit;
+        color: #0f0f0f;
+        background-color: #ffffff;
+        transition: border-color 0.25s;
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:hover {
+        border-color: #396cd8;
+      }
+
+      input,
+      button {
+        outline: none;
+      }
+
+      #greet-input {
+        margin-right: 5px;
+      }
+
+      body {
+        font-family: "FiraSans", sans-serif;
+        font-size: 1.2em;
+      }
+      h1 {
+        font-family: "FiraSansMedium", sans-serif
+      }
+
+      .camera {
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+        aspect-ratio: 16/9;
+        width: 48vw;
+      }
+
+      #feed1 {
+        transform: rotate(180deg)
+      }
+
+    /* #live-image2 { */
+    /*   width: 48vw; */
+    /*   height: 27vw; */
+    /* } */
+
+    #camera-feeds {
+      display: flex;
+      justify-content: space-around;
+      align-items: space-around;
+    }
+
+    .live-image-div {
+      display: block;
+      text-align: center;
+    }
+
+    .text {
+      margin-bottom: 1em;
+    }
+    </style>
+  </head>
   <body>
     <div class="container">
       <h1>STEVE ROV Client!</h1>
@@ -26,4 +160,62 @@
       </div>
     </div>
   </body>
+  <script>
+      let ws_feed1 = new WebSocket("ws://192.168.100.2:3000")
+      // let ws_feed1 = new WebSocket("ws://localhost:3000")
+      ws_feed1.binaryType = "arraybuffer"
+        
+      let feed1 = document.querySelector("#feed1")
+      let feed1_ctx = feed1.getContext("2d")
+
+      /*
+      ws_feed1.addEventListener("message", (event) => {
+          let decoder = new ImageDecoder({
+              type: "image/jpeg",
+              data: event.data
+          })
+
+          let frame = decoder.decode().then((res) => {
+
+              feed1_ctx.drawImage(res.image, 0, 0);
+          })
+      })
+      */
+
+      ws_feed1.addEventListener('message', (event) => {
+        var frame = new Image();
+        frame.src = "data:image/jpg;base64," + btoa(
+          new Uint8Array(event.data).reduce(
+              (data, byte) => data + String.fromCharCode(byte), '')
+        );
+
+        
+        const feed1_ctx = feed1.getContext("2d");
+        frame.addEventListener("load", function () {
+          //feed1_ctx.drawImage(frame, 0, 0, frame.width, frame.height, 0, 0, 854, 480);
+          feed1_ctx.drawImage(frame, 0, 0, frame.width, frame.height, 0, 0, 1280, 720);
+        });
+        
+      })
+
+      let ws_feed2 = new WebSocket("ws://192.168.100.4:3000")
+      //let ws_feed2 = new WebSocket("ws://localhost:4000")
+      ws_feed2.binaryType = "arraybuffer"
+        
+      let feed2 = document.querySelector("#feed2")
+      let feed2_ctx = feed2.getContext("2d")
+
+      ws_feed2.addEventListener("message", (event) => {
+          let decoder = new ImageDecoder({
+              type: "image/jpeg",
+              data: event.data
+          })
+
+          let frame = decoder.decode().then((res) => {
+
+              feed2_ctx.drawImage(res.image, 0, 0);
+          })
+      })
+
+  </script>
 </html>
