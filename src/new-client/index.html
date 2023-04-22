@@ -156,6 +156,10 @@
       padding-top: 0px;
       color: coral;
     }
+    .coral-pic {
+      transform: rotate(180deg);
+    }
+
     </style>
   </head>
   <body>
@@ -207,7 +211,7 @@
       feed1.addEventListener("click", () => {
         console.log("Click!")
 
-        let metric = 2;
+        const metric = 6;
         let pixPerMetric = 0;
         let points = [];
 
@@ -228,6 +232,7 @@
         let width_info = document.createElement("p")
         width_info.className = "coral-info"
         let pic = document.createElement("img")
+        pic.className = "coral-pic"
 
         let big_diseased_button = document.createElement("button")
         let medium_diseased_button = document.createElement("button")
@@ -257,7 +262,8 @@
 
                 let pixDistance = Math.sqrt(difX*difX + difY*difY)
 
-                let distance = pixDistance / pixPerMetric
+                const base_height = 3
+                let distance = (pixDistance / pixPerMetric) + base_height
 
                 console.log(distance + " cm")
                 height_info.textContent = `Coral Height: ${distance.toFixed(2)} cm`
@@ -270,8 +276,7 @@
 
                 let pixDistance = Math.sqrt(difX*difX + difY*difY)
 
-                const MAGIC_CONSTANT = 1.25
-                let distance = pixDistance / pixPerMetric * MAGIC_CONSTANT
+                let distance = pixDistance / pixPerMetric * Math.SQRT2
 
                 console.log(distance + " in.")
                 width_info.textContent = `Coral Width: ${distance.toFixed(2)} cm`
@@ -281,7 +286,6 @@
               points = []
               new_space.remove()
 
-              diseased_area = big_diseased_spots * 36 + medium_diseased_spots * 16 + small_diseased_spots * 4
               const coral_info = {
                 "height": coral_height, "width": coral_width,
                 "diseased_area": diseased_area,
@@ -290,23 +294,22 @@
                 "small_diseased_spots": small_diseased_spots
               }
               console.log(coral_info)
-              const file_system = require("fs");
-              file_system.writeFile('file.json', JSON.stringify(coral_info), (error) => {
-                if (error) throw error;
-              });
             } 
         })
         big_diseased_button.onclick = () => {
           big_diseased_spots++
-          diseased_spot_info.textContent = `Large: ${big_diseased_spots} Medium: ${medium_diseased_spots} Small: ${small_diseased_spots}`
+          diseased_area = big_diseased_spots * 36 + medium_diseased_spots * 16 + small_diseased_spots * 4
+          diseased_spot_info.textContent = `Diseased Area: ${diseased_area} cm^2`
         }
         medium_diseased_button.onclick = () => {
           medium_diseased_spots++
-          diseased_spot_info.textContent = `Large: ${big_diseased_spots} Medium: ${medium_diseased_spots} Small: ${small_diseased_spots}`
+          diseased_area = big_diseased_spots * 36 + medium_diseased_spots * 16 + small_diseased_spots * 4
+          diseased_spot_info.textContent = `Diseased Area: ${diseased_area} cm^2`
         }
         small_diseased_button.onclick = () => {
           small_diseased_spots++
-          diseased_spot_info.textContent = `Large: ${big_diseased_spots} Medium: ${medium_diseased_spots} Small: ${small_diseased_spots}`
+          diseased_area = big_diseased_spots * 36 + medium_diseased_spots * 16 + small_diseased_spots * 4
+          diseased_spot_info.textContent = `Diseased Area: ${diseased_area} cm^2`
         }
 
         new_space.appendChild(pic)
@@ -318,7 +321,7 @@
         new_space.appendChild(diseased_spot_info)
 
         document.body.appendChild(new_space);
-          })
+      })
 
       let ws_feed2 = new WebSocket("ws://192.168.100.3:3000")
       ws_feed2.binaryType = "arraybuffer"

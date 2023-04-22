@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Float Management Menu </title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, inital-scale=1">
+        <link href="data:image/x-icon;base64,
+	    iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpw
+        YAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABTSURBVHgB7c8BDcAgAMAwftXIQR
+        tGwMZCWgf95l5nPOAfjxCpEakRqRGpEakRqRGpEakRqRGpEakRqRGpEakRqRGpEakRqRGpE
+        akRqRGpEakRqbmEhANdmzET8gAAAABJRU5ErkJggg=="
+        rel="icon" type="image/x-icon">
+
+        <style>
+        </style>
+    </head>
+        <body>
+        <h1> Float Information </h1>
+        <p>We were not provided with a company number, but here's our team name, and our registration ID</p>
+        <p> <b> Team Name: </b> Team Sunk</p>
+        <p> <b> Company Number: </b> R-14HN08J2</p>
+
+        <b> Current UTC Time: </b> 
+        <p id="time"></p>
+    </body>
+</html>
+<script>
+        alert("Connecting...");
+        alert("Connecting...");
+        alert("Connecting...");
+        alert("Connecting...");
+        const team_name = "Team Sunk";
+        const company_number = "R-14HN08J2";
+        const date = new Date();
+        let time = `${date.getUTCHours()}:${date.getUTCMinutes()}:${date.getUTCSeconds()}`;
+        alert(`${team_name} - ${company_number} - ${time}`);
+        document.querySelector("#time").textContent = `${time}`;
+</script>
+
+<script>
+    setTimeout(function(){
+    let time = d.getTime();
+    let unix_time = date.getTime();
+    alert(unix_time)
+</script>
