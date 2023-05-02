@@ -142,7 +142,7 @@ async def main_server():
         # the joystick interprets up as -1 and down as 1, the negative just
         # reverses this so up is 1 and down is -1
         y_velocity = joystick_data["left_stick"][1] * speed_factor
-        z_velocity = joystick_data["right_stick"][1] * speed_factor
+        z_velocity = -joystick_data["right_stick"][1] * speed_factor
         yaw_velocity = joystick_data["right_stick"][0] * speed_factor
         roll_velocity = joystick_data["dpad"][0] * speed_factor
         #  gripper_grab = (joystick_data["buttons"]["right_trigger"]
