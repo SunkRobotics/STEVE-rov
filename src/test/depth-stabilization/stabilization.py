@@ -41,11 +41,6 @@ class PID:
         output = (self.proportional_gain * error + self.integral_gain
                   * self.error_sum + self.derivative_gain * d_error)
 
-        # make sure output within the valid motors input range
-        if output > 1:
-            output = 1
-        elif output < 0:
-            output = 0
         print(f"Output: {output}")
         return output
 
@@ -87,6 +82,12 @@ while True:
     # use the PID controller to determine the best z velocity based on the
     # current depth
     new_z_velocity = pid_controller.compute(current_depth)
+
+    # make sure output within the valid motors input range
+    if new_z_velocity > 1:
+        new_z_velocity = 1
+    elif new_z_velocity < 0:
+        new_z_velocity = 0
     motors.drive_motors(z_velocity=new_z_velocity)
 
     time.sleep(0.01)
