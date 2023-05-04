@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from motors.py import Motors
+from motors import Motors
 import ms5837
 import time
 
@@ -30,7 +30,7 @@ class PID:
 
         # compute the integral
         self.error_sum += error * d_time
-        print(f"Error: {self.error_sum}")
+        print(f"Integral: {self.error_sum}")
 
         # compute the derivative
         d_error = (error - self.last_error) / d_time
@@ -41,7 +41,6 @@ class PID:
         output = (self.proportional_gain * error + self.integral_gain
                   * self.error_sum + self.derivative_gain * d_error)
 
-        print(f"Output: {output}")
         return output
 
 
@@ -66,9 +65,9 @@ if not depth_sensor.init():
     print("Depth sensor could not be initialized")
     exit(1)
 
-target_depth = 0.5  # 0.5 meters
-proportional_gain = 0.1
-integral_gain = 3
+target_depth = 0.1  # 0.5 meters
+proportional_gain = 0.03
+integral_gain = 0.1
 derivative_gain = 0.004
 pid_controller = PID(target_depth, proportional_gain, integral_gain,
                      derivative_gain)
@@ -79,6 +78,7 @@ while True:
         continue
 
     current_depth = depth_sensor.depth()
+    print(current_depth)
     # use the PID controller to determine the best z velocity based on the
     # current depth
     new_z_velocity = pid_controller.compute(current_depth)
@@ -88,6 +88,7 @@ while True:
         new_z_velocity = 1
     elif new_z_velocity < 0:
         new_z_velocity = 0
+    print(f"Output: {new_z_velocity}")
     motors.drive_motors(z_velocity=new_z_velocity)
 
     time.sleep(0.01)
