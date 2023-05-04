@@ -53,12 +53,16 @@ class Plant:
         self.plant_state -= 10
         self.plant_state += actuating_signal
         return self.plant_state
+
+
 depth_sensor = ms5837.MS5837_02BA(1)
 
 # initialize the sensor before reading it
 if not depth_sensor.init():
     print("Depth sensor could not be initialized")
     exit(1)
+
+pid_controller = PID(0.5, 0.5, 3, 0.004)
 
 
 
