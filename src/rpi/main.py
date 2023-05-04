@@ -2,7 +2,7 @@ import asyncio
 import json
 import time
 from motors import Motors
-#  from ms5837 import MS5837_30BA
+from ms5837 import MS5837_02BA
 import websockets
 
 
@@ -86,8 +86,8 @@ class PID:
     last_error = None
     error_sum = 0
 
-    def __init__(self, set_point, proportional_gain, integral_gain,
-                 derivative_gain):
+    def __init__(self, set_point=0, proportional_gain=0, integral_gain=0,
+                 derivative_gain=0):
         self.set_point = set_point
         self.proportional_gain = proportional_gain
         self.integral_gain = integral_gain
@@ -118,20 +118,28 @@ class PID:
 
 async def main_server():
     motors = Motors()
-    #  depth_sensor =
+
+    depth_sensor = MS5837_02BA(1)
+    vertical_anchor = False
     # adjust the y-velocity to have the ROV remain at a constant depth
-    #  vertical_anchor = False
-    #  vertical_pid = PID(0, 0.4, 3, 0.001)
-    # stores the last button press of the velocity toggle button
-    prev_speed_toggle = None
+    vertical_pid = PID()
+
     # multiplier for velocity to set speed limit
     speed_factor = 0.5
 
-    #  prev_anchor_toggle = None
+    # stores the last button press of the velocity toggle button
+    prev_speed_toggle = None
+    # stores the last button press of the anchor toggle button
+    prev_anchor_toggle = None
+
+    if not depth_sensor.init():
+        print("Fuck")
+        exit(1)
 
     print("Server started!")
     while True:
         joystick_data = WSServer.pump_joystick_data()
+        depth_sensor.read()
 
         # if a joystick client hasn't connected yet
         if not joystick_data:
@@ -145,17 +153,11 @@ async def main_server():
         z_velocity = -joystick_data["right_stick"][1] * speed_factor
         yaw_velocity = joystick_data["right_stick"][0] * speed_factor
         roll_velocity = joystick_data["dpad"][0] * speed_factor
-        #  gripper_grab = (joystick_data["buttons"]["right_trigger"]
-        #                  - joystick_data["buttons"]["left_trigger"])
-        # rotate left if negative, rotate right if positive
-        #  gripper_rotate = (joystick_data["buttons"]["right_bumper"]
-        #                    - joystick_data["buttons"]["left_bumper"])
         speed_toggle = joystick_data["dpad"][1]
-        #  anchor_toggle = joystick_data['buttons'][11]
+        anchor_toggle = joystick_data["buttons"]["north"]
 
-        # if vertical_anchor:
-        # arduino_commands["y"] = vertical_pid.compute(
-        # arduino_data["z_accel"])
+        if vertical_anchor:
+            z_velocity = vertical_pid.compute(depth_sensor.depth())
 
         motors.drive_motors(x_velocity, y_velocity, z_velocity, yaw_velocity,
                             roll_velocity)
@@ -176,13 +178,19 @@ async def main_server():
                 speed_factor = 0
             prev_speed_toggle = speed_toggle
 
-        # toggle the vertical anchor
-        #  if anchor_toggle == 1 and prev_anchor_toggle == 0:
-        #      if vertical_anchor:
-        #          vertical_anchor = False
-        #      else:
-        #          vertical_anchor = True
-        #  prev_anchor_toggle = anchor_toggle
+        #  toggle the vertical anchor
+        if anchor_toggle == 1 and prev_anchor_toggle == 0:
+            if vertical_anchor:
+                print("Vertical anchor disabled!")
+                vertical_anchor = False
+            else:
+                vertical_anchor = True
+                vertical_anchor_depth = depth_sensor.depth()
+                vertical_pid = PID(vertical_anchor_depth, proportional_gain=2,
+                                   integral_gain=0.05, derivative_gain=0.01)
+                print(f"Vertical anchor enabled at: {vertical_anchor_depth} m")
+
+        prev_anchor_toggle = anchor_toggle
 
         await asyncio.sleep(0.01)
 
