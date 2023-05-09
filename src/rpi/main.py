@@ -104,7 +104,7 @@ class PID:
 
         # difference between the target and measured acceleration
         error = self.set_point - process_value
-        # compute the integral
+        # compute the integral ∫e(t) dt
         self.error_sum += error * d_time
         # compute the derivative
         d_error = (error - self.last_error) / d_time
