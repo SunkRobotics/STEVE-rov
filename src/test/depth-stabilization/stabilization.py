@@ -22,11 +22,11 @@ class PID:
     def compute(self, process_value: float) -> float:
         current_time = time.time()
         d_time = time.time() - self.last_time
-        print(f"Change in Time: {d_time}")
+        #  print(f"Change in Time: {d_time}")
         self.last_time = current_time
 
         error = self.set_point - process_value
-        print(f"Error: {error}")
+        print(f"\nError: {error}")
 
         # compute the integral
         self.error_sum += error * d_time
@@ -65,10 +65,10 @@ if not depth_sensor.init():
     print("Depth sensor could not be initialized")
     exit(1)
 
-target_depth = 0.1  # 0.5 meters
-proportional_gain = 0.03
+target_depth = 2  # 0.5 meters
+proportional_gain = 2
 integral_gain = 0.1
-derivative_gain = 0.004
+derivative_gain = 0.01
 pid_controller = PID(target_depth, proportional_gain, integral_gain,
                      derivative_gain)
 
@@ -78,7 +78,7 @@ while True:
         continue
 
     current_depth = depth_sensor.depth()
-    print(current_depth)
+    print(f'Depth: {current_depth} cm')
     # use the PID controller to determine the best z velocity based on the
     # current depth
     new_z_velocity = pid_controller.compute(current_depth)
@@ -86,8 +86,8 @@ while True:
     # make sure output within the valid motors input range
     if new_z_velocity > 1:
         new_z_velocity = 1
-    elif new_z_velocity < 0:
-        new_z_velocity = 0
+    elif new_z_velocity < -1:
+        new_z_velocity = -1
     print(f"Output: {new_z_velocity}")
     motors.drive_motors(z_velocity=new_z_velocity)
 
