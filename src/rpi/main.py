@@ -1,8 +1,10 @@
+import adafruit_bno055
 import asyncio
+import board
 import json
-import time
 from motors import Motors
 from ms5837 import MS5837_02BA
+import time
 import websockets
 
 
@@ -84,7 +86,6 @@ class WSServer:
 class PID:
     last_time = None
     last_error = None
-    error_sum = 0
 
     def __init__(self, set_point=0, proportional_gain=0, integral_gain=0,
                  derivative_gain=0):
@@ -93,6 +94,7 @@ class PID:
         self.integral_gain = integral_gain
         self.derivative_gain = derivative_gain
 
+        self.integral = 0
         self.last_time = time.time()
         self.last_error = set_point
 
@@ -104,15 +106,18 @@ class PID:
 
         # difference between the target and measured acceleration
         error = self.set_point - process_value
+        #  print(f"Set point: {self.set_point}")
+        #  print(f"Process value: {process_value}")
+        #  print(f"Error: {error}")
         # compute the integral ∫e(t) dt
-        self.error_sum += error * d_time
+        self.integral += error * d_time
         # compute the derivative
         d_error = (error - self.last_error) / d_time
         self.last_error = error
 
         # add the P, I, and the D together
         output = (self.proportional_gain * error + self.integral_gain
-                  * self.error_sum + self.derivative_gain * d_error)
+                  * self.integral + self.derivative_gain * d_error)
         return output
 
 
@@ -120,21 +125,32 @@ async def main_server():
     motors = Motors()
 
     depth_sensor = MS5837_02BA(1)
+    try:
+        imu = adafruit_bno055.BNO055_I2C(board.I2C())
+    except OSError:
+        print("Unable to connect IMU")
+
     vertical_anchor = False
     # adjust the y-velocity to have the ROV remain at a constant depth
     vertical_pid = PID()
+
+    roll_anchor = False
+    # adjust the roll velocity to keep the ROV stable
+    roll_pid = PID()
 
     # multiplier for velocity to set speed limit
     speed_factor = 0.5
 
     # stores the last button press of the velocity toggle button
     prev_speed_toggle = None
-    # stores the last button press of the anchor toggle button
-    prev_anchor_toggle = None
+    # stores the last button press of the vertical anchor toggle button
+    prev_vertical_anchor_toggle = None
+    # stores the last button press of the roll anchor toggle button
+    prev_roll_anchor_toggle = None
 
     if not depth_sensor.init():
-        print("Fuck")
-        exit(1)
+        print("Depth sensor not working!")
+        depth_sensor = None
 
     print("Server started!")
     while True:
@@ -154,10 +170,20 @@ async def main_server():
         yaw_velocity = joystick_data["right_stick"][0] * speed_factor
         roll_velocity = joystick_data["dpad"][0] * speed_factor
         speed_toggle = joystick_data["dpad"][1]
-        anchor_toggle = joystick_data["buttons"]["north"]
+        vertical_anchor_toggle = joystick_data["buttons"]["north"]
+        roll_anchor_toggle = joystick_data["buttons"]["east"]
 
+        # set the z velocity according to the vertical PID controller based on
+        # current depth
         if vertical_anchor:
             z_velocity = vertical_pid.compute(depth_sensor.depth())
+        
+        # set the roll velocity according to the roll PID controller based on
+        # current roll angle
+        if roll_anchor:
+            roll_angle = imu.euler[1]
+            if roll_angle is not None:
+                roll_velocity = roll_pid.compute(roll_angle)
 
         motors.drive_motors(x_velocity, y_velocity, z_velocity, yaw_velocity,
                             roll_velocity)
@@ -179,18 +205,31 @@ async def main_server():
             prev_speed_toggle = speed_toggle
 
         #  toggle the vertical anchor
-        if anchor_toggle == 1 and prev_anchor_toggle == 0:
+        if vertical_anchor_toggle and not prev_vertical_anchor_toggle:
             if vertical_anchor:
                 print("Vertical anchor disabled!")
                 vertical_anchor = False
-            else:
+            elif depth_sensor is not None:
                 vertical_anchor = True
                 vertical_anchor_depth = depth_sensor.depth()
                 vertical_pid = PID(vertical_anchor_depth, proportional_gain=2,
                                    integral_gain=0.05, derivative_gain=0.01)
                 print(f"Vertical anchor enabled at: {vertical_anchor_depth} m")
 
-        prev_anchor_toggle = anchor_toggle
+        #  toggle the roll anchor
+        if roll_anchor_toggle and not prev_roll_anchor_toggle:
+            if roll_anchor:
+                print("Roll anchor disabled!")
+                roll_anchor = False
+            elif depth_sensor is not None:
+                roll_anchor = True
+                roll_anchor_angle = imu.euler[1]
+                roll_pid = PID(roll_anchor_angle, proportional_gain=0.025,
+                               integral_gain=0.001, derivative_gain=0.0e-4)
+                print(f"Roll anchor enabled at: {roll_anchor_angle}°")
+
+        prev_vertical_anchor_toggle = vertical_anchor_toggle
+        prev_roll_anchor_toggle = roll_anchor_toggle
 
         await asyncio.sleep(0.01)
 

@@ -40,9 +40,9 @@ def main():
 
         x_velocity += avg_accel_x
 
-        print(avg_accel_x)
+        #  print(avg_accel_x)
         #  print(x_velocity)
-        #  print(f'{avg_accel_z:.2f}')
+        print(f'{avg_accel_z:.2f}')
         count += 1
         time.sleep(0.01)
 
