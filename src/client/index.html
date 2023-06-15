@@ -102,7 +102,7 @@
 
       body {
         font-family: "FiraSans", sans-serif;
-        font-size: 1.2em;
+        font-size: 1.1em;
       }
       h1 {
         font-family: "FiraSansMedium", sans-serif
@@ -112,11 +112,11 @@
         margin-left: 0.5em;
         margin-right: 0.5em;
         aspect-ratio: 16/9;
-        width: 40vw;
+        width: 35vw;
       }
 
       #feed1 {
-        transform: rotate(180deg)
+        transform: rotate(0deg)
       }
 
     /* #live-image2 { */
@@ -140,13 +140,47 @@
     .text {
       margin-bottom: 1em;
     }
+    #sensor-table {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+    .sensor-cell {
+      width: 15%;
+    }
+    main {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 10% 85%;
+    }
+
+    ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: last-baseline;
+    }
+
+    li {
+      text-align: left;
+    }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>STEVE ROV Client!</h1>
+      
+      <main>
+        <ul>
+          <li id="depth">Depth</li>
+          <li id="temperature">Temperature</li>
+          <li id="yaw-angle">Yaw Angle</li>
+          <li id="pitch-angle">Pitch Angle</li>
+          <li id="roll-angle">Roll Angle</li>
 
-      <div id="camera-feeds">
+        </ul>
+        <div id="camera-feeds">
             <div class="live-image-div">
               <canvas class="camera" id="feed1" width=1280 height=720></canvas>
               <p>Gripper Camera</p>
@@ -162,10 +196,31 @@
               <canvas class="camera" id="feed3" width=1280 height=720></canvas>
             <p>Bottom Camera</p>
             </div>
-      </div>
+        </div>
+      </main>
     </div>
   </body>
   <script>
+      let main_ws = new WebSocket("ws://192.168.100.1:8765")
+      const main_client_info = {'client_type': 'web_client_main'}
+      main_ws.addEventListener('open', (event) => {
+        main_ws.send(JSON.stringify(main_client_info))
+      })
+
+      main_ws.addEventListener('message', (event) => {
+        var sensor_data = JSON.parse(event.data)
+        document.querySelector("#temperature").innerText =
+          `Temperature: \n${sensor_data.temperature}°C`
+        document.querySelector("#depth").innerText =
+          `Depth: \n${sensor_data.depth.toFixed(2)} m`
+        document.querySelector("#yaw-angle").innerText =
+          `Yaw Angle: \n${sensor_data.yaw_angle.toFixed(2)}°`
+        document.querySelector("#roll-angle").innerText =
+          `Roll Angle: \n${sensor_data.roll_angle.toFixed(2)}°`
+        document.querySelector("#pitch-angle").innerText =
+          `Pitch Angle: \n${sensor_data.pitch_angle.toFixed(2)}°`
+      })
+
       let ws_feed1 = new WebSocket("ws://192.168.100.2:3000")
       ws_feed1.binaryType = "arraybuffer"
         
