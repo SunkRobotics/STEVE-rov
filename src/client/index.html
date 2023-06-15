@@ -165,6 +165,23 @@
     li {
       text-align: left;
     }
+
+    .newSpace {
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.8);
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      align-items: center;
+    }
+    .coral-info {
+      padding-top: 0px;
+      color: coral;
+    }
     </style>
   </head>
   <body>
@@ -240,6 +257,121 @@
           feed1_ctx.drawImage(frame, 0, 0, frame.width, frame.height, 0, 0, 1280, 720);
         });
         
+      })
+
+      feed1.addEventListener("click", () => {
+        console.log("Click!")
+
+        const metric = 6;
+        let pixPerMetric = 0;
+        let points = [];
+
+        let coral_width = 14.01;
+        let coral_height = 31.02;
+        let big_diseased_spots = 0
+        let medium_diseased_spots = 0
+        let small_diseased_spots = 0
+
+        let diseased_area = 0;
+
+        let new_space = document.createElement("div")
+
+        new_space.className = "newSpace"
+
+        let height_info = document.createElement("p")
+        height_info.className = "coral-info"
+        let width_info = document.createElement("p")
+        width_info.className = "coral-info"
+        let pic = document.createElement("img")
+        pic.className = "coral-pic"
+
+        let big_diseased_button = document.createElement("button")
+        let medium_diseased_button = document.createElement("button")
+        let small_diseased_button = document.createElement("button")
+
+        let diseased_spot_info = document.createElement("p")
+        diseased_spot_info.className = "coral-info"
+
+        pic.src = feed1.toDataURL()
+
+        pic.addEventListener("click", (e) => {
+            points.push([e.offsetX, e.offsetY])
+
+            if (points.length == 2) {
+                let difX = points[0][0] - points[1][0]
+                let difY = points[0][1] - points[1][1]
+
+                let distance = Math.sqrt(difX*difX + difY*difY)
+                console.log(distance)
+
+                pixPerMetric = distance / metric
+            }
+
+            if (points.length == 4) {
+                let difX = points[2][0] - points[3][0]
+                let difY = points[2][1] - points[3][1]
+
+                let pixDistance = Math.sqrt(difX*difX + difY*difY)
+
+                const base_height = 3
+                let distance = (pixDistance / pixPerMetric) + base_height
+
+                console.log(distance + " cm")
+                height_info.textContent = `Coral Height: ${distance.toFixed(2)} cm`
+                coral_height = distance
+
+            }
+            if (points.length == 6) {
+                let difX = points[4][0] - points[5][0]
+                let difY = points[4][1] - points[5][1]
+
+                let pixDistance = Math.sqrt(difX*difX + difY*difY)
+
+                let distance = pixDistance / pixPerMetric * Math.SQRT2
+
+                console.log(distance + " in.")
+                width_info.textContent = `Coral Width: ${distance.toFixed(2)} cm`
+                coral_width = distance
+            }
+            if (points.length >= 7) {
+              points = []
+              new_space.remove()
+
+              const coral_info = {
+                "height": coral_height, "width": coral_width,
+                "diseased_area": diseased_area,
+                "big_diseased_spots": big_diseased_spots,
+                "medium_diseased_spots": medium_diseased_spots,
+                "small_diseased_spots": small_diseased_spots
+              }
+              console.log(coral_info)
+            } 
+        })
+        big_diseased_button.onclick = () => {
+          big_diseased_spots++
+          diseased_area = big_diseased_spots * 36 + medium_diseased_spots * 16 + small_diseased_spots * 4
+          diseased_spot_info.textContent = `Diseased Area: ${diseased_area} cm^2`
+        }
+        medium_diseased_button.onclick = () => {
+          medium_diseased_spots++
+          diseased_area = big_diseased_spots * 36 + medium_diseased_spots * 16 + small_diseased_spots * 4
+          diseased_spot_info.textContent = `Diseased Area: ${diseased_area} cm^2`
+        }
+        small_diseased_button.onclick = () => {
+          small_diseased_spots++
+          diseased_area = big_diseased_spots * 36 + medium_diseased_spots * 16 + small_diseased_spots * 4
+          diseased_spot_info.textContent = `Diseased Area: ${diseased_area} cm^2`
+        }
+
+        new_space.appendChild(pic)
+        new_space.appendChild(big_diseased_button)
+        new_space.appendChild(medium_diseased_button)
+        new_space.appendChild(small_diseased_button)
+        new_space.appendChild(height_info)
+        new_space.appendChild(width_info)
+        new_space.appendChild(diseased_spot_info)
+
+        document.body.appendChild(new_space);
       })
 
       let ws_feed2 = new WebSocket("ws://192.168.100.3:3000")
