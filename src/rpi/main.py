@@ -192,10 +192,10 @@ async def main_server():
         if speed_toggle != prev_speed_toggle:
             # make sure the speed doesn't exceed 1
             if speed_toggle > 0 and speed_factor < 1:
-                speed_factor *= 2
-            # make sure the speed doesn't fall below 0.125
-            if speed_toggle < 0 and speed_factor >= 0.125:
-                speed_factor /= 2
+                speed_factor += 0.25
+            # make sure the speed doesn't fall below 0.25
+            if speed_toggle < 0 and speed_factor >= 0.25:
+                speed_factor -= 0.25
 
             # just in case the speed factor ends up out of range
             if speed_factor > 1:
