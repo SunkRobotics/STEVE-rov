@@ -1,3 +1,4 @@
+#!/bin/python
 import adafruit_bno055
 import asyncio
 import board
@@ -141,12 +142,22 @@ async def main_server():
     # multiplier for velocity to set speed limit
     speed_factor = 0.5
 
+    # lock the controls in a certain state to allow for "autonomous" docking
+    motor_lock = False
+
+    locked_velocities = {
+        "x_velocity": 0,
+        "y_velocity": 0,
+        "z_velocity": 0,
+        "yaw_velocity": 0,
+        "roll_velocity": 0
+    }
+
     # stores the last button press of the velocity toggle button
     prev_speed_toggle = None
-    # stores the last button press of the vertical anchor toggle button
     prev_vertical_anchor_toggle = None
-    # stores the last button press of the roll anchor toggle button
     prev_roll_anchor_toggle = None
+    prev_motor_lock_toggle = None
 
     if not depth_sensor.init():
         print("Depth sensor not working!")
@@ -172,12 +183,20 @@ async def main_server():
         speed_toggle = joystick_data["dpad"][1]
         vertical_anchor_toggle = joystick_data["buttons"]["north"]
         roll_anchor_toggle = joystick_data["buttons"]["east"]
+        motor_lock_toggle = joystick_data["buttons"]["west"]
+
+        if motor_lock:
+            x_velocity = locked_velocities["x_velocity"]
+            y_velocity = locked_velocities["y_velocity"]
+            z_velocity = locked_velocities["z_velocity"]
+            yaw_velocity = locked_velocities["yaw_velocity"]
+            roll_velocity = locked_velocities["roll_velocity"]
 
         # set the z velocity according to the vertical PID controller based on
         # current depth
         if vertical_anchor:
             z_velocity = vertical_pid.compute(depth_sensor.depth())
-        
+
         # set the roll velocity according to the roll PID controller based on
         # current roll angle
         if roll_anchor:
@@ -204,7 +223,7 @@ async def main_server():
                 speed_factor = 0
             prev_speed_toggle = speed_toggle
 
-        #  toggle the vertical anchor
+        # toggle the vertical anchor
         if vertical_anchor_toggle and not prev_vertical_anchor_toggle:
             if vertical_anchor:
                 print("Vertical anchor disabled!")
@@ -216,7 +235,7 @@ async def main_server():
                                    integral_gain=0.05, derivative_gain=0.01)
                 print(f"Vertical anchor enabled at: {vertical_anchor_depth} m")
 
-        #  toggle the roll anchor
+        # toggle the roll anchor
         if roll_anchor_toggle and not prev_roll_anchor_toggle:
             if roll_anchor:
                 print("Roll anchor disabled!")
@@ -228,8 +247,23 @@ async def main_server():
                                integral_gain=0.001, derivative_gain=0.0e-4)
                 print(f"Roll anchor enabled at: {roll_anchor_angle}°")
 
+        # toggle the motor lock
+        if motor_lock_toggle and not prev_motor_lock_toggle:
+            if motor_lock:
+                motor_lock = False
+                print("Motor lock disabled!")
+            else:
+                motor_lock = True
+                locked_velocities["x_velocity"] = x_velocity
+                locked_velocities["y_velocity"] = y_velocity
+                locked_velocities["z_velocity"] = z_velocity
+                locked_velocities["yaw_velocity"] = yaw_velocity
+                locked_velocities["roll_velocity"] = roll_velocity
+                print("Motor lock enabled!")
+
         prev_vertical_anchor_toggle = vertical_anchor_toggle
         prev_roll_anchor_toggle = roll_anchor_toggle
+        prev_motor_lock_toggle = motor_lock_toggle
 
         await asyncio.sleep(0.01)
 
@@ -248,3 +282,4 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         print('')
+
